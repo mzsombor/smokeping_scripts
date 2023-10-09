@@ -21,6 +21,7 @@ sequenceDiagram
     * smokeping uses cgi to display the graphs
     * apache has native cgi implementation
     * nginx does not have native cgi implementation and the GUI was very slow with nginx + smokeping
+
 * MASTER has the following files (check smokeping docs for details):
     * slave and slave_secrets
         * specific slave config (display color and so on)
@@ -41,6 +42,7 @@ sequenceDiagram
         * storage is also not very well distributed
 
 * SLAVE will:
+    * if using @includes in master `config` file make sure you make some change (comments or timestamp) otherwise change will not be detected 
     * get config from master and start probes that are configured for him only
     * master and slave config will compare config timestamps and detect changes - if timestampt differs smokeping slave is reloaded
 
