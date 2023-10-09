@@ -2,5 +2,6 @@
 # smokeping config files are stored in git repository
 # place this script in .git/hooks/post-merge
 # set up a cron to pull files every 15 minutes
+# */15    *       *       *       *       git -C /etc/smokeping pull
 # commands below will trigger config check first before reload
 (smokeping --config /etc/smokeping/config --check && /etc/init.d/smokeping reload && /etc/init.d/apache2 reload) > /etc/smokeping/smokeping_lastgithook.log 2>&1
