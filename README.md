@@ -2,19 +2,40 @@
 
 ```mermaid
 sequenceDiagram
-    participant M as MASTER
-    participant S as SLAVE
-    M->>M: Start/Reload
-    S->>M: Get config
-    M->>S: Send config
-    opt is new config
-        S->>S: Reload probes
+    participant User;
+    participant SNMP;
+    participant Gitlab;
+    participant SPM as Smokeping Master
+    participant SPS as Smokeping Slave[1..n]
+    User ->> Gitlab: provision target includes/probes/... file via gitlab gui or api
+    User ->> Gitlab: update config file with anything (otherwise no config change detected)
+    loop PROVISIONING@cron_interval
+        SPM ->> Gitlab: git pull with post merge
+        alt if changes
+            SPM ->> SPM: check config and write to log
+        end
+        alt if valid config
+            SPM ->> SPM: reload and write to log
+        end
     end
-    loop every probe offset
-        S->>S: FPing
-        S->>M: Send fping results
-        M->>M: Apache write to rrd
+    loop MASTER_SLAVE_SETUP@probing_time
+        SPS->>SPS: FPing
+        SPS->>SPM: Send fping results
+        opt master has new config
+            SPM ->> SPS: Send new config
+            SPS ->> SPS: Reload probes
+        end          
+        SPM->>SPM: Apache write to rrd
     end
+    loop SNMP@polling_time
+        SNMP ->> SPM: snmp polling
+        SPM ->> SPM: call custom smokeping stats script
+        SPM ->> SNMP: return stats
+        SNMP ->> SPS: snmp polling
+        SPS ->> SPS: call custom smokeping stats script
+        SPS ->> SNMP: return stats
+    end
+
 ```
 
 * NGINX/APACHE/SMOKEPING setup
