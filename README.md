@@ -15,7 +15,7 @@ sequenceDiagram
             SPM ->> SPM: check config and write to log
         end
         alt if valid config
-            SPM ->> SPM: reload and write to log
+            SPM ->> SPM: restart smokeping (reload is crashing), reload apache2 and write to log
         end
     end
     loop MASTER_SLAVE_SETUP@probing_time
